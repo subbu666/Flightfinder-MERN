@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { GeneralContext } from '../context/GeneralContext';
 import api from '../config/axios';
@@ -10,12 +10,7 @@ const Flights = () => {
   const navigate = useNavigate();
   const { showError } = useContext(GeneralContext);
 
-  useEffect(()=>{
-    fetchUserData();
-    fetchFlights();
-  }, [])
-
-  const fetchUserData = async () =>{
+  const fetchUserData = useCallback(async () => {
     try{
       const id = localStorage.getItem('userId');
       const response = await api.get(`/fetch-user/${id}`);
@@ -23,9 +18,9 @@ const Flights = () => {
     }catch(err){
       showError('Error', 'Failed to load user data.');
     }
-  } 
+  }, [showError]);
 
-  const fetchFlights = async () =>{
+  const fetchFlights = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get('/fetch-flights');
@@ -34,7 +29,12 @@ const Flights = () => {
       showError('Error', 'Failed to load flights.');
     }
     setLoading(false);
-  }
+  }, [showError]);
+
+  useEffect(() => {
+    fetchUserData();
+    fetchFlights();
+  }, [fetchUserData, fetchFlights]);
 
   const operatorFlights = flights.filter(flight => flight.flightName === localStorage.getItem('username'));
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { GeneralContext } from '../context/GeneralContext';
 import api from '../config/axios';
@@ -6,11 +6,11 @@ import api from '../config/axios';
 const NewFlight = () => {
 
     const [userDetails, setUserDetails] = useState();
-    const [flightName, setFlightName] = useState(localStorage.getItem('username'));
+    const flightName = localStorage.getItem('username'); // Regular variable since it's never updated
     const [flightId, setFlightId] = useState('');
     const [origin, setOrigin] = useState('');
     const [destination, setDestination] = useState('');
-    const [journeyDate, setJourneyDate] = useState(''); // ✅ FIX 1: Added journeyDate state
+    const [journeyDate, setJourneyDate] = useState('');
     const [startTime, setStartTime] = useState('');
     const [arrivalTime, setArrivalTime] = useState('');
     const [totalSeats, setTotalSeats] = useState('');
@@ -35,11 +35,7 @@ const NewFlight = () => {
       { value: 'Jaipur', label: 'Jaipur' }
     ];
   
-    useEffect(()=>{
-      fetchUserData();
-    }, [])
-
-    const fetchUserData = async () =>{
+    const fetchUserData = useCallback(async () => {
       try{
         const id = localStorage.getItem('userId');
         const response = await api.get(`/fetch-user/${id}`);
@@ -47,10 +43,13 @@ const NewFlight = () => {
       }catch(err){
         showError('Error', 'Failed to load user data.');
       }
-    } 
+    }, [showError]);
+
+    useEffect(() => {
+      fetchUserData();
+    }, [fetchUserData]);
   
     const handleSubmit = async () =>{
-      // ✅ FIX 3: Updated validation to include journeyDate
       if (!flightId || !origin || !destination || !journeyDate || !startTime || !arrivalTime || !totalSeats || !basePrice) {
         showError('Missing Information', 'Please fill in all required fields.');
         return;
@@ -62,13 +61,12 @@ const NewFlight = () => {
       }
 
       setLoading(true);
-      // ✅ FIX 4: Added journeyDate to inputs object
       const inputs = {
         flightName, 
         flightId, 
         origin, 
         destination, 
-        journeyDate, // ✅ ADD THIS
+        journeyDate,
         departureTime: startTime, 
         arrivalTime, 
         basePrice: parseInt(basePrice), 
@@ -76,7 +74,6 @@ const NewFlight = () => {
       };
   
       try {
-        // ✅ FIX 5: Endpoint already correct as 'add-flight'
         await api.post('/add-flight', inputs);
         showSuccess('Flight Added', 'Your new flight route has been added successfully.');
         navigate('/flights');
@@ -196,7 +193,6 @@ const NewFlight = () => {
                   />
                 </div>
               </div>
-              {/* ✅ FIX 2: Added Journey Date input field */}
               <div className="form-row">
                 <div className="form-group">
                   <label>Journey Date *</label>

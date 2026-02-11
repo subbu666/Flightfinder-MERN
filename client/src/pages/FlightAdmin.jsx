@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { GeneralContext } from '../context/GeneralContext';
 import api from '../config/axios';
@@ -13,12 +13,7 @@ const FlightAdmin = () => {
   const [flightsCount, setFlightsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-    fetchUserData();
-    fetchData();
-  }, [])
-
-  const fetchUserData = async () =>{
+  const fetchUserData = useCallback(async () => {
     try{
       const id = localStorage.getItem('userId');
       const response = await api.get(`/fetch-user/${id}`);
@@ -26,9 +21,9 @@ const FlightAdmin = () => {
     }catch(err){
       showError('Error', 'Failed to load user data.');
     }
-  } 
+  }, [showError]);
 
-  const fetchData = async () =>{
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const username = localStorage.getItem('username');
@@ -43,7 +38,12 @@ const FlightAdmin = () => {
       showError('Error', 'Failed to load dashboard data.');
     }
     setLoading(false);
-  }
+  }, [showError]);
+
+  useEffect(() => {
+    fetchUserData();
+    fetchData();
+  }, [fetchUserData, fetchData]);
 
   const statCards = [
     { 

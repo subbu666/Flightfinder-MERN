@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import { GeneralContext } from '../context/GeneralContext';
 import api from '../config/axios';
 
@@ -10,12 +10,7 @@ const FlightBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const { showSuccess, showError } = useContext(GeneralContext);
 
-  useEffect(()=>{
-    fetchUserData(); 
-    fetchBookings();
-  }, [])
-
-  const fetchUserData = async () =>{
+  const fetchUserData = useCallback(async () => {
     try{
       const id = localStorage.getItem('userId');
       const response = await api.get(`/fetch-user/${id}`);
@@ -23,9 +18,9 @@ const FlightBookings = () => {
     }catch(err){
       showError('Error', 'Failed to load user data.');
     }
-  } 
+  }, [showError]);
 
-  const fetchBookings = async () =>{
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get('/fetch-bookings');
@@ -34,7 +29,12 @@ const FlightBookings = () => {
       showError('Error', 'Failed to load bookings.');
     }
     setLoading(false);
-  }
+  }, [showError]);
+
+  useEffect(() => {
+    fetchUserData(); 
+    fetchBookings();
+  }, [fetchUserData, fetchBookings]);
 
   const handleCancelClick = (booking) => {
     setSelectedBooking(booking);
