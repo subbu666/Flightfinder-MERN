@@ -345,6 +345,7 @@ const OTPModal = ({
             </div>
           )}
 
+          {/* VERIFY BUTTON */}
           <button 
             className="otp-verify-btn"
             onClick={handleVerify}
@@ -358,7 +359,7 @@ const OTPModal = ({
               </span>
             ) : (
               <>
-                <span>Verify</span>
+                <span>Verify Code</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
@@ -398,12 +399,13 @@ const OTPModal = ({
           position: relative;
           width: 100%;
           max-width: 520px;
+          max-height: 90vh;
+          overflow-y: auto;
           background: linear-gradient(145deg, rgba(22, 27, 34, 0.98) 0%, rgba(13, 17, 23, 0.98) 100%);
           border: 1px solid rgba(212, 175, 55, 0.2);
           border-radius: 28px;
           box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), 0 0 60px rgba(212, 175, 55, 0.15);
           animation: otpModalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-          overflow: hidden;
         }
 
         @keyframes otpModalSlideUp {
@@ -843,6 +845,7 @@ const OTPModal = ({
           transition: all 0.3s ease;
           box-shadow: 0 4px 20px var(--role-color)40;
           animation: otpFadeInUp 0.5s ease 0.7s backwards;
+          margin-bottom: 20px;
         }
 
         .otp-verify-btn:hover:not(:disabled) {
@@ -882,7 +885,7 @@ const OTPModal = ({
         .otp-help-text {
           font-size: 0.8rem;
           color: rgba(255, 255, 255, 0.4);
-          margin: 20px 0 0;
+          margin: 0;
           line-height: 1.6;
           animation: otpFadeInUp 0.5s ease 0.8s backwards;
         }
