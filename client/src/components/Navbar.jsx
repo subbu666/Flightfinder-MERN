@@ -12,7 +12,7 @@ const Navbar = () => {
     const [showCreatorModal, setShowCreatorModal] = useState(false);
 
     // Add your photo URL here
-    const creatorPhotoUrl = "https://i.postimg.cc/fbznTS46/Whats-App-Image-2025-06-29-at-08-28-57-f2c6ea81.jpg"; // Replace with your actual photo URL
+    const creatorPhotoUrl = process.env.REACT_APP_CREATOR_PHOTO_URL; // Replace with your actual photo URL
 
     useEffect(() => {
         const handleScroll = () => {
