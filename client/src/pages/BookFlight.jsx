@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react'
+import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react' // ✅ Added useMemo
 import { GeneralContext } from '../context/GeneralContext';
 import api from '../config/axios';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -44,7 +44,14 @@ const BookFlight = () => {
     const [passengerDetails, setPassengerDetails] = useState([]);
   
     const [totalPrice, setTotalPrice] = useState(0);
-    const price = {'economy': 1, 'premium-economy': 2, 'business': 3, 'first-class': 4}
+    
+    // ✅ Fixed: Wrapped price object in useMemo to stabilize reference
+    const price = useMemo(() => ({
+      'economy': 1, 
+      'premium-economy': 2, 
+      'business': 3, 
+      'first-class': 4
+    }), []);
     
   
     const handlePassengerChange = (event) => {
@@ -611,4 +618,4 @@ const BookFlight = () => {
     )
   }
 
-export default BookFlight
+export default BookFlight;

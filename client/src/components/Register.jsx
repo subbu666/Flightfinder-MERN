@@ -92,8 +92,8 @@ const Register = ({setIsLogin}) => {
       // First create temp user entry
       await api.post('/create-temp-user', { email, username, usertype });
       
-      // Send OTP
-      const response = await api.post('/send-signup-otp', { 
+      // Send OTP - ✅ Fixed: Removed unused response variable
+      await api.post('/send-signup-otp', { 
         email, 
         username, 
         usertype 

@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
 
-const AuthProtector =  ({ children }) => {
+const AuthProtector = ({ children }) => {
 
   useEffect(() => {
-
     if (!localStorage.getItem('userType')) {
       window.location.href = '/';
     }
-  }, [localStorage]);
-
+  }, []); // ✅ Fixed: Removed localStorage from dependency array
 
   return children;
 };
