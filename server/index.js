@@ -556,6 +556,32 @@ app.put('/cancel-ticket/:id', async (req, res) => {
 });
 
 /* =======================
+   Health Check / Root Route
+======================= */
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Flight Booking API is running',
+    status: 'active',
+    endpoints: {
+      auth: ['/send-signup-otp', '/login', '/forgot-password'],
+      flights: ['/fetch-flights', '/add-flight'],
+      bookings: ['/fetch-bookings', '/book-ticket']
+    }
+  });
+});
+
+/* =======================
+   Health Check for UptimeRobot
+======================= */
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+/* =======================
    Server
 ======================= */
 app.listen(PORT, () => {
