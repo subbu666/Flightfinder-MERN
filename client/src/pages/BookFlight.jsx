@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { GeneralContext } from '../context/GeneralContext';
 import api from '../config/axios';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -14,11 +14,7 @@ const BookFlight = () => {
     const [startTime, setStartTime] = useState();
     const [loading, setLoading] = useState(true);
   
-    useEffect(()=>{
-      fetchFlightData();
-    }, [])
-  
-    const fetchFlightData = async () =>{
+    const fetchFlightData = useCallback(async () => {
       setLoading(true);
       try {
         const response = await api.get(`/fetch-flight/${id}`);
@@ -32,7 +28,11 @@ const BookFlight = () => {
         console.log(err);
       }
       setLoading(false);
-    }
+    }, [id]);
+
+    useEffect(() => {
+      fetchFlightData();
+    }, [fetchFlightData]);
   
     const [email, setEmail] = useState('');
     const [mobile, setMobile] = useState('');
@@ -60,11 +60,11 @@ const BookFlight = () => {
       });
     };
   
-    useEffect(()=>{
+    useEffect(() => {
       if(price[coachType] * basePrice * numberOfPassengers){
         setTotalPrice(price[coachType] * basePrice * numberOfPassengers);
       }
-    },[numberOfPassengers, coachType, basePrice])
+    }, [numberOfPassengers, coachType, basePrice, price]);
   
   
     const navigate = useNavigate();

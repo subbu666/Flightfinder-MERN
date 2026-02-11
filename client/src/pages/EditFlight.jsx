@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { GeneralContext } from '../context/GeneralContext';
 import api from '../config/axios';
@@ -33,11 +33,7 @@ const EditFlight = () => {
       { value: 'Jaipur', label: 'Jaipur' }
     ];
   
-    useEffect(()=>{
-      fetchFlightData();
-    }, [])
-  
-    const fetchFlightData = async () =>{
+    const fetchFlightData = useCallback(async () => {
       setLoading(true);
       try {
         const response = await api.get(`/fetch-flight/${id}`);
@@ -68,7 +64,11 @@ const EditFlight = () => {
         showError('Error', 'Failed to load flight data.');
       }
       setLoading(false);
-    }
+    }, [id, showError]);
+
+    useEffect(() => {
+      fetchFlightData();
+    }, [fetchFlightData]);
   
     const handleSubmit = async () =>{
       const inputs = {

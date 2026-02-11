@@ -1,13 +1,11 @@
 import api from '../config/axios';
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react'
 
 const AllFlights = () => {
     const [flights, setFlights] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
   
-    const fetchFlights = async () =>{
+    const fetchFlights = useCallback(async () => {
       setLoading(true);
       try {
         const response = await api.get('/fetch-flights');
@@ -16,11 +14,11 @@ const AllFlights = () => {
         console.log(err);
       }
       setLoading(false);
-    }
+    }, []);
       
-    useEffect(()=>{
+    useEffect(() => {
       fetchFlights();
-    }, [])
+    }, [fetchFlights]);
       
     return (
       <div className="all-flights-page">

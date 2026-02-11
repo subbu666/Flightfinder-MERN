@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useCallback } from 'react'
 import api from '../config/axios';
 import { GeneralContext } from '../context/GeneralContext';
 
@@ -12,11 +12,7 @@ const Bookings = () => {
 
   const userId = localStorage.getItem('userId');
 
-  useEffect(()=>{
-    fetchBookings();
-  }, [])
-
-  const fetchBookings = async () =>{
+  const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get('/fetch-bookings');
@@ -25,7 +21,11 @@ const Bookings = () => {
       showError('Error', 'Failed to load your bookings.');
     }
     setLoading(false);
-  }
+  }, [showError]);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
   const handleCancelClick = (booking) => {
     setSelectedBooking(booking);
