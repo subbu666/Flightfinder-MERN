@@ -175,6 +175,14 @@ const OTPModal = ({
     return colors[usertype] || '#d4af37';
   };
 
+  // Helper function to convert hex to rgba
+  const hexToRgba = (hex, alpha) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const roleColor = getRoleColor();
   const remainingAttempts = MAX_RESEND_ATTEMPTS - resendCount;
 
@@ -191,7 +199,13 @@ const OTPModal = ({
         </button>
 
         <div className="otp-modal-content">
-          <div className="otp-icon-wrapper" style={{'--role-color': roleColor}}>
+          <div className="otp-icon-wrapper" style={{
+            '--role-color': roleColor,
+            '--role-color-15': hexToRgba(roleColor, 0.15),
+            '--role-color-08': hexToRgba(roleColor, 0.08),
+            '--role-color-40': hexToRgba(roleColor, 0.4),
+            '--role-color-30': hexToRgba(roleColor, 0.3)
+          }}>
             <div className="otp-icon-circle">
               {type === 'reset' ? (
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={roleColor} strokeWidth="2">
@@ -262,7 +276,12 @@ const OTPModal = ({
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={index === 0 ? handlePaste : undefined}
                 className={`otp-input ${isExpired ? 'expired' : ''}`}
-                style={{'--role-color': roleColor}}
+                style={{
+                  '--role-color': roleColor,
+                  '--role-color-20': hexToRgba(roleColor, 0.2),
+                  '--role-color-30': hexToRgba(roleColor, 0.3),
+                  '--role-color-08': hexToRgba(roleColor, 0.08)
+                }}
                 disabled={isExpired}
               />
             ))}
@@ -285,11 +304,16 @@ const OTPModal = ({
               className={`otp-resend-btn ${resendCount >= MAX_RESEND_ATTEMPTS ? 'disabled' : ''}`}
               onClick={handleResend}
               disabled={!canResend || isResending || resendCount >= MAX_RESEND_ATTEMPTS}
-              style={{'--role-color': roleColor}}
+              style={{
+                '--role-color': roleColor,
+                '--role-color-30': hexToRgba(roleColor, 0.3),
+                '--role-color-15': hexToRgba(roleColor, 0.15),
+                '--role-color-50': hexToRgba(roleColor, 0.5)
+              }}
             >
               {isResending ? (
                 <span className="otp-resend-spinner">
-                  <span className="mini-spinner"></span>
+                  <span className="mini-spinner" style={{'--role-color': roleColor, '--role-color-30': hexToRgba(roleColor, 0.3)}}></span>
                   Sending...
                 </span>
               ) : canResend && resendCount < MAX_RESEND_ATTEMPTS ? (
@@ -350,7 +374,12 @@ const OTPModal = ({
             className="otp-verify-btn"
             onClick={handleVerify}
             disabled={isVerifying || otp.some(d => !d) || isExpired}
-            style={{'--role-color': roleColor}}
+            style={{
+              '--role-color': roleColor,
+              '--role-color-light': hexToRgba(roleColor, 0.9),
+              '--role-color-shadow': hexToRgba(roleColor, 0.4),
+              '--role-color-hover-shadow': hexToRgba(roleColor, 0.5)
+            }}
           >
             {isVerifying ? (
               <span className="otp-loading-spinner">
@@ -458,8 +487,8 @@ const OTPModal = ({
         .otp-icon-circle {
           width: 100px;
           height: 100px;
-          background: linear-gradient(135deg, var(--role-color)15, var(--role-color)08);
-          border: 2px solid var(--role-color)40;
+          background: linear-gradient(135deg, var(--role-color-15), var(--role-color-08));
+          border: 2px solid var(--role-color-40);
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -481,7 +510,7 @@ const OTPModal = ({
         .otp-icon-ripple {
           position: absolute;
           inset: 0;
-          border: 2px solid var(--role-color)30;
+          border: 2px solid var(--role-color-30);
           border-radius: 50%;
           animation: otpRipple 1.5s ease-out 0.3s infinite;
         }
@@ -640,13 +669,13 @@ const OTPModal = ({
           outline: none;
           background: rgba(255, 255, 255, 0.08);
           border-color: var(--role-color);
-          box-shadow: 0 0 0 3px var(--role-color)20, 0 4px 12px var(--role-color)30;
+          box-shadow: 0 0 0 3px var(--role-color-20), 0 4px 12px var(--role-color-30);
           transform: scale(1.05);
         }
 
         .otp-input:not(:placeholder-shown) {
           border-color: var(--role-color);
-          background: var(--role-color)08;
+          background: var(--role-color-08);
         }
 
         .otp-input.expired {
@@ -705,7 +734,7 @@ const OTPModal = ({
 
         .otp-resend-btn {
           background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--role-color)30;
+          border: 1px solid var(--role-color-30);
           color: var(--role-color);
           font-size: 0.85rem;
           font-weight: 600;
@@ -719,10 +748,10 @@ const OTPModal = ({
         }
 
         .otp-resend-btn:hover:not(:disabled) {
-          background: var(--role-color)15;
-          border-color: var(--role-color)50;
+          background: var(--role-color-15);
+          border-color: var(--role-color-50);
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px var(--role-color)30;
+          box-shadow: 0 4px 12px var(--role-color-30);
         }
 
         .otp-resend-btn:disabled {
@@ -751,7 +780,7 @@ const OTPModal = ({
         .mini-spinner {
           width: 14px;
           height: 14px;
-          border: 2px solid var(--role-color)30;
+          border: 2px solid var(--role-color-30);
           border-top-color: var(--role-color);
           border-radius: 50%;
           animation: otpSpin 0.8s linear infinite;
@@ -835,7 +864,7 @@ const OTPModal = ({
           align-items: center;
           justify-content: center;
           gap: 10px;
-          background: linear-gradient(135deg, var(--role-color), var(--role-color)cc);
+          background: linear-gradient(135deg, var(--role-color), var(--role-color-light));
           border: none;
           border-radius: 14px;
           color: #0a0e27;
@@ -843,14 +872,15 @@ const OTPModal = ({
           font-weight: 600;
           cursor: pointer;
           transition: all 0.3s ease;
-          box-shadow: 0 4px 20px var(--role-color)40;
+          box-shadow: 0 4px 20px var(--role-color-shadow);
           animation: otpFadeInUp 0.5s ease 0.7s backwards;
           margin-bottom: 20px;
         }
 
         .otp-verify-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 30px var(--role-color)50;
+          box-shadow: 0 8px 30px var(--role-color-hover-shadow);
+          filter: brightness(1.1);
         }
 
         .otp-verify-btn:active:not(:disabled) {
