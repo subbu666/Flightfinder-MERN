@@ -1,43 +1,52 @@
 // emailService.js
-import nodemailer from 'nodemailer';
+import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Create Gmail SMTP transporter
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,       // STARTTLS port
-  secure: false,   // STARTTLS (TLS upgrade)
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  dns: { family: 4 }
-});
-
-const SENDER_EMAIL = process.env.GMAIL_USER;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const SENDER_EMAIL = process.env.SENDER_EMAIL;
 const SENDER_NAME = process.env.SENDER_NAME;
 
 /**
- * Send email via Gmail SMTP
+ * Send email via Brevo API
  */
 const sendEmail = async (to, subject, htmlContent) => {
   try {
-    const mailOptions = {
-      from: `"${SENDER_NAME}" <${SENDER_EMAIL}>`,
-      to: to,
-      subject: subject,
-      html: htmlContent,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: SENDER_NAME,
+          email: SENDER_EMAIL
+        },
+        to: [
+          {
+            email: to
+          }
+        ],
+        subject: subject,
+        htmlContent: htmlContent
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ Brevo API error:', data);
+      throw new Error(data.message || 'Failed to send email');
+    }
+
+    console.log('✅ Email sent successfully via Brevo:', data.messageId);
+    return {
+      success: true,
+      messageId: data.messageId
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    
-    console.log('✅ Email sent successfully:', info.messageId);
-    return { 
-      success: true, 
-      messageId: info.messageId 
-    };
-    
   } catch (error) {
     console.error('❌ Email sending error:', error);
     throw new Error(error.message || 'Failed to send email');
