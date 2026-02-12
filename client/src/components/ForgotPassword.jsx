@@ -758,12 +758,15 @@ const ForgotPassword = ({ onClose, onSuccess }) => {
           position: relative;
           width: 100%;
           max-width: 560px;
+          max-height: 90vh;
           background: linear-gradient(145deg, rgba(22, 27, 34, 0.98) 0%, rgba(13, 17, 23, 0.98) 100%);
           border: 1px solid rgba(212, 175, 55, 0.2);
           border-radius: 28px;
           box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), 0 0 60px rgba(212, 175, 55, 0.15);
           animation: fpSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
           overflow: hidden;
+          display: flex;
+          flex-direction: column;
         }
 
         @keyframes fpSlideUp {
@@ -804,6 +807,47 @@ const ForgotPassword = ({ onClose, onSuccess }) => {
 
         .fp-content {
           padding: 50px 40px 40px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          max-height: calc(90vh - 80px);
+        }
+
+        /* Custom scrollbar styling - Premium Gold */
+        .fp-content::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        .fp-content::-webkit-scrollbar-track {
+          background: linear-gradient(180deg, rgba(22, 27, 34, 0.8), rgba(13, 17, 23, 0.8));
+          border-radius: 10px;
+          margin: 10px 0;
+          border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        .fp-content::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #d4af37, #e4c158, #d4af37);
+          border-radius: 10px;
+          border: 2px solid rgba(22, 27, 34, 0.98);
+          box-shadow: 
+            0 0 10px rgba(212, 175, 55, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .fp-content::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #e4c158, #f5d673, #e4c158);
+          box-shadow: 
+            0 0 15px rgba(212, 175, 55, 0.7),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .fp-content::-webkit-scrollbar-thumb:active {
+          background: linear-gradient(180deg, #c49a2e, #d4af37, #c49a2e);
+        }
+
+        /* Firefox scrollbar */
+        .fp-content {
+          scrollbar-width: thin;
+          scrollbar-color: #d4af37 rgba(22, 27, 34, 0.8);
         }
 
         .fp-steps {
@@ -1416,10 +1460,12 @@ const ForgotPassword = ({ onClose, onSuccess }) => {
         @media (max-width: 480px) {
           .forgot-password-container {
             margin: 0 16px;
+            max-height: 85vh;
           }
 
           .fp-content {
             padding: 40px 24px 32px;
+            max-height: calc(85vh - 80px);
           }
 
           .fp-form h2 {
