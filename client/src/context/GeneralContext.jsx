@@ -88,64 +88,66 @@ const GeneralContextProvider = ({children}) => {
       );
 
     } catch (err) {
-      console.error('Login Error:', err);
-
       // Handle different error types from backend
       if (err.response) {
         const { status, data } = err.response;
-        const errorType = data.errorType;
-        const errorMessage = data.message;
+        const errorType = data?.errorType;
+        const errorMessage = data?.message;
 
-        switch (errorType) {
-          case 'USER_NOT_FOUND':
-            showError(
-              'Account Not Found', 
-              'No account exists with this email address. Would you like to create a new account?'
-            );
-            break;
-
-          case 'EMAIL_NOT_VERIFIED':
-            showError(
-              'Email Not Verified', 
-              'Please verify your email first. Check your inbox for the verification code.'
-            );
-            break;
-
-          case 'INVALID_PASSWORD':
-            showError(
-              'Invalid Password', 
-              'The password you entered is incorrect. Please try again or use "Forgot Password" if needed.'
-            );
-            break;
-
-          case 'APPROVAL_PENDING':
-            if (data.approvalStatus === 'not-approved') {
-              showWarning(
-                'Approval Pending', 
-                'Your flight operator account is waiting for admin approval. You will receive an email once approved.'
-              );
-            } else if (data.approvalStatus === 'rejected') {
-              showError(
-                'Account Rejected', 
-                'Your flight operator account has been rejected. Please contact support for more information.'
-              );
-            }
-            break;
-
-          case 'VALIDATION_ERROR':
-            showError(
-              'Missing Information', 
-              'Please provide both email and password to login.'
-            );
-            break;
-
-          default:
-            // Generic error message
-            showError(
-              'Login Failed', 
-              errorMessage || 'Unable to login. Please check your credentials and try again.'
-            );
+        // Handle specific error types
+        if (status === 404 || errorType === 'USER_NOT_FOUND') {
+          showError(
+            'Account Not Found', 
+            'No account exists with this email address. Please register first or check your email.'
+          );
+          return;
         }
+
+        if (status === 403 && errorType === 'EMAIL_NOT_VERIFIED') {
+          showError(
+            'Email Not Verified', 
+            'Please verify your email first. Check your inbox for the verification code.'
+          );
+          return;
+        }
+
+        if (status === 401 || errorType === 'INVALID_PASSWORD') {
+          showError(
+            'Invalid Password', 
+            'The password you entered is incorrect. Please try again or use "Forgot Password" if needed.'
+          );
+          return;
+        }
+
+        if (errorType === 'APPROVAL_PENDING') {
+          if (data.approvalStatus === 'not-approved') {
+            showWarning(
+              'Approval Pending', 
+              'Your flight operator account is waiting for admin approval. You will receive an email once approved.'
+            );
+          } else if (data.approvalStatus === 'rejected') {
+            showError(
+              'Account Rejected', 
+              'Your flight operator account has been rejected. Please contact support for more information.'
+            );
+          }
+          return;
+        }
+
+        if (errorType === 'VALIDATION_ERROR') {
+          showError(
+            'Missing Information', 
+            'Please provide both email and password to login.'
+          );
+          return;
+        }
+
+        // Generic error with message from backend
+        showError(
+          'Login Failed', 
+          errorMessage || 'Unable to login. Please check your credentials and try again.'
+        );
+
       } else if (err.request) {
         // Network error - no response received
         showError(
@@ -187,15 +189,13 @@ const GeneralContextProvider = ({children}) => {
 
         }).catch((err) =>{
             showError('Registration Failed', 'Unable to create account. Please try again.');
-            console.log(err);
+            console.error('Registration Error:', err);
         });
     }catch(err){
         showError('Registration Failed', 'Something went wrong. Please try again later.');
-        console.log(err);
+        console.error('Registration Error:', err);
     }
   }
-
-
 
   const logout = async () =>{
     
@@ -214,8 +214,6 @@ const GeneralContextProvider = ({children}) => {
       }
     );
   }
-
-
 
   return (
     <GeneralContext.Provider value={{
