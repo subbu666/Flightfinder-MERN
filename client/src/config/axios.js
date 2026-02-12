@@ -1,4 +1,3 @@
-//client/src/config/axios.js
 import axios from 'axios';
 import API_URL from './api';
 
@@ -25,15 +24,31 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - handle errors globally
+// Response interceptor - CRITICAL: Don't redirect on login errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized
+    // IMPORTANT: Only redirect to login if it's a token expiry issue
+    // NOT for login route errors (401 on /login means wrong password, not expired token)
+    
+    const isLoginRoute = error.config?.url?.includes('/login');
+    
+    // Only auto-redirect if:
+    // 1. It's a 401 error
+    // 2. It's NOT the login route
+    // 3. User has a token (meaning they were logged in)
+    if (
+      error.response?.status === 401 && 
+      !isLoginRoute && 
+      localStorage.getItem('token')
+    ) {
+      // Token expired or invalid - clear and redirect
       localStorage.clear();
       window.location.href = '/login';
     }
+    
+    // CRITICAL: Always return the error as-is so it can be handled properly
+    // in the component/context
     return Promise.reject(error);
   }
 );
