@@ -1,8 +1,22 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { GeneralContext } from '../context/GeneralContext';
 
 const PremiumModal = () => {
   const { modal, hideModal } = useContext(GeneralContext);
+
+  useEffect(() => {
+    // Prevent body scroll when modal is open
+    if (modal.show) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [modal.show]);
 
   if (!modal.show) return null;
 
@@ -40,7 +54,7 @@ const PremiumModal = () => {
           <div className="modal-icon info">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
               <circle cx="24" cy="24" r="24" fill="rgba(59, 130, 246, 0.2)"/>
-              <path d="M24 20V20.01M24 16V26M24 32V32.01" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round"/>
+              <path d="M24 16V26M24 32V32.01" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round"/>
             </svg>
           </div>
         );
@@ -48,18 +62,34 @@ const PremiumModal = () => {
   };
 
   const handleConfirm = () => {
+    // Execute callback if provided (for navigation, etc.)
     if (modal.onConfirm) {
       modal.onConfirm();
     }
     hideModal();
   };
 
+  const handleCancel = () => {
+    hideModal();
+  };
+
+  const handleOverlayClick = () => {
+    // Only close on overlay click if showCancel is true or it's not a critical action
+    if (modal.showCancel || modal.type !== 'error') {
+      hideModal();
+    }
+  };
+
   return (
     <>
-      <div className="premium-modal-overlay" onClick={hideModal}>
+      <div className="premium-modal-overlay" onClick={handleOverlayClick}>
         <div className="premium-modal" onClick={(e) => e.stopPropagation()}>
           <div className={`premium-modal-header ${modal.type}`}>
-            <button className="modal-close-btn" onClick={hideModal}>
+            <button 
+              className="modal-close-btn" 
+              onClick={handleCancel}
+              aria-label="Close modal"
+            >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
@@ -72,13 +102,17 @@ const PremiumModal = () => {
           </div>
           <div className="premium-modal-footer">
             {modal.showCancel && (
-              <button className="btn-premium btn-premium-outline" onClick={hideModal}>
+              <button 
+                className="btn-premium btn-premium-outline" 
+                onClick={handleCancel}
+              >
                 Cancel
               </button>
             )}
             <button 
               className={`btn-premium ${modal.type === 'error' ? 'btn-premium-danger' : modal.type === 'success' ? 'btn-premium-success' : ''}`} 
               onClick={handleConfirm}
+              autoFocus
             >
               {modal.showCancel ? 'Confirm' : 'OK'}
             </button>
@@ -102,6 +136,15 @@ const PremiumModal = () => {
           z-index: 9999;
           animation: fadeIn 0.3s ease;
           padding: 20px;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
 
         .premium-modal {
@@ -173,6 +216,10 @@ const PremiumModal = () => {
           transform: rotate(90deg);
         }
 
+        .modal-close-btn:active {
+          transform: rotate(90deg) scale(0.95);
+        }
+
         .premium-modal-body {
           padding: 32px;
           text-align: center;
@@ -182,6 +229,21 @@ const PremiumModal = () => {
           margin-bottom: 20px;
           display: flex;
           justify-content: center;
+          animation: iconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes iconBounce {
+          0% {
+            transform: scale(0);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
 
         .modal-title {
@@ -190,6 +252,18 @@ const PremiumModal = () => {
           font-weight: 600;
           color: white;
           margin-bottom: 12px;
+          animation: titleSlide 0.5s ease 0.1s both;
+        }
+
+        @keyframes titleSlide {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .modal-message {
@@ -197,6 +271,18 @@ const PremiumModal = () => {
           font-size: 1rem;
           line-height: 1.6;
           margin: 0;
+          animation: messageSlide 0.5s ease 0.2s both;
+        }
+
+        @keyframes messageSlide {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .premium-modal-footer {
@@ -204,15 +290,93 @@ const PremiumModal = () => {
           display: flex;
           gap: 12px;
           justify-content: center;
+          animation: footerSlide 0.5s ease 0.3s both;
+        }
+
+        @keyframes footerSlide {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .premium-modal-footer .btn-premium {
           min-width: 120px;
+          padding: 12px 24px;
+          border-radius: 12px;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: none;
+        }
+
+        .btn-premium-outline {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-premium-outline:hover {
+          background: rgba(255, 255, 255, 0.15);
+          transform: translateY(-2px);
+        }
+
+        .btn-premium-outline:active {
+          transform: translateY(0);
+        }
+
+        .btn-premium-success {
+          background: linear-gradient(135deg, #00d4aa 0%, #00aa88 100%);
+          color: white;
+        }
+
+        .btn-premium-success:hover {
+          box-shadow: 0 8px 16px rgba(0, 212, 170, 0.3);
+          transform: translateY(-2px);
+        }
+
+        .btn-premium-success:active {
+          transform: translateY(0);
+        }
+
+        .btn-premium-danger {
+          background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+          color: white;
+        }
+
+        .btn-premium-danger:hover {
+          box-shadow: 0 8px 16px rgba(220, 53, 69, 0.3);
+          transform: translateY(-2px);
+        }
+
+        .btn-premium-danger:active {
+          transform: translateY(0);
+        }
+
+        /* Default button (info/warning) */
+        .premium-modal-footer .btn-premium:not(.btn-premium-outline):not(.btn-premium-success):not(.btn-premium-danger) {
+          background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+          color: #0a0e27;
+        }
+
+        .premium-modal-footer .btn-premium:not(.btn-premium-outline):not(.btn-premium-success):not(.btn-premium-danger):hover {
+          box-shadow: 0 8px 16px rgba(212, 175, 55, 0.3);
+          transform: translateY(-2px);
+        }
+
+        .premium-modal-footer .btn-premium:not(.btn-premium-outline):not(.btn-premium-success):not(.btn-premium-danger):active {
+          transform: translateY(0);
         }
 
         @media (max-width: 480px) {
           .premium-modal {
             max-width: 100%;
+            margin: 0 16px;
           }
           
           .premium-modal-body {
@@ -223,6 +387,10 @@ const PremiumModal = () => {
             font-size: 1.5rem;
           }
           
+          .modal-message {
+            font-size: 0.95rem;
+          }
+          
           .premium-modal-footer {
             padding: 16px 24px 24px;
             flex-direction: column;
@@ -230,7 +398,19 @@ const PremiumModal = () => {
           
           .premium-modal-footer .btn-premium {
             width: 100%;
+            min-width: unset;
           }
+        }
+
+        /* Keyboard focus styles */
+        .btn-premium:focus-visible {
+          outline: 2px solid rgba(212, 175, 55, 0.5);
+          outline-offset: 2px;
+        }
+
+        .modal-close-btn:focus-visible {
+          outline: 2px solid rgba(255, 255, 255, 0.5);
+          outline-offset: 2px;
         }
       `}</style>
     </>

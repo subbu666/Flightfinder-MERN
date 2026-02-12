@@ -217,38 +217,80 @@ app.post('/resend-otp', async (req, res) => {
   }
 });
 
-// Login
+// Login - FIXED VERSION
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ 
+        message: 'Please provide both email and password',
+        errorType: 'VALIDATION_ERROR'
+      });
+    }
+
+    // Check if user exists
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(401).json({ message: 'Invalid email or password' });
+    
+    if (!user) {
+      return res.status(404).json({ 
+        message: 'No account found with this email. Please register first.',
+        errorType: 'USER_NOT_FOUND'
+      });
+    }
 
     // Check if user is verified
     if (!user.isVerified) {
       return res.status(403).json({ 
-        message: 'Please verify your email first',
+        message: 'Please verify your email first. Check your inbox for the verification code.',
+        errorType: 'EMAIL_NOT_VERIFIED',
         needsVerification: true,
         email: user.email
       });
     }
 
+    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(401).json({ message: 'Invalid email or password' });
+    if (!isMatch) {
+      return res.status(401).json({ 
+        message: 'Invalid password. Please check your password and try again.',
+        errorType: 'INVALID_PASSWORD'
+      });
+    }
 
-    res.json({
+    // Check if flight operator is approved
+    if (user.usertype === 'flight-operator' && user.approval !== 'approved') {
+      let approvalMessage = '';
+      if (user.approval === 'not-approved') {
+        approvalMessage = 'Your flight operator account is pending approval. Please wait for admin approval.';
+      } else if (user.approval === 'rejected') {
+        approvalMessage = 'Your flight operator account has been rejected. Please contact support.';
+      }
+      
+      return res.status(403).json({ 
+        message: approvalMessage,
+        errorType: 'APPROVAL_PENDING',
+        approvalStatus: user.approval
+      });
+    }
+
+    // Success - return user data
+    res.status(200).json({
+      success: true,
       _id: user._id,
       username: user.username,
       email: user.email,
       usertype: user.usertype,
       approval: user.approval
     });
+
   } catch (err) {
     console.error('Login Error:', err.message);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ 
+      message: 'An error occurred during login. Please try again.',
+      errorType: 'SERVER_ERROR'
+    });
   }
 });
 

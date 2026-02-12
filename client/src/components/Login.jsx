@@ -9,12 +9,17 @@ const Login = ({setIsLogin}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  const handleLogin = async (e) =>{
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await login();
-    setIsLoading(false);
-  }
+    try {
+      await login();
+    } catch (error) {
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleForgotPasswordSuccess = (message) => {
     showSuccess('Password Reset Complete', message);
@@ -44,6 +49,7 @@ const Login = ({setIsLogin}) => {
               placeholder=" "
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
             <label htmlFor="email">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -62,6 +68,7 @@ const Login = ({setIsLogin}) => {
               placeholder=" "
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
             <label htmlFor="password">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -74,6 +81,7 @@ const Login = ({setIsLogin}) => {
               type="button" 
               className="password-toggle"
               onClick={() => setShowPassword(!showPassword)}
+              disabled={isLoading}
             >
               {showPassword ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -94,6 +102,7 @@ const Login = ({setIsLogin}) => {
               type="button" 
               className="link-button"
               onClick={() => setShowForgotPassword(true)}
+              disabled={isLoading}
             >
               Forgot Password?
             </button>
@@ -127,7 +136,7 @@ const Login = ({setIsLogin}) => {
           </div>
           <p className="switch-auth">
             Don't have an account? 
-            <span onClick={() => setIsLogin(false)}>Create Account</span>
+            <span onClick={() => !isLoading && setIsLogin(false)}>Create Account</span>
           </p>
         </div>
 
@@ -201,6 +210,11 @@ const Login = ({setIsLogin}) => {
             transition: all 0.3s ease;
           }
 
+          .form-group.floating .form-control:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+
           .form-group.floating .form-control:focus {
             background: rgba(255, 255, 255, 0.08);
             border-color: #d4af37;
@@ -264,8 +278,13 @@ const Login = ({setIsLogin}) => {
             z-index: 10;
           }
 
-          .password-toggle:hover {
+          .password-toggle:hover:not(:disabled) {
             color: rgba(255, 255, 255, 0.8);
+          }
+
+          .password-toggle:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
           }
 
           .forgot-password-link {
@@ -284,9 +303,14 @@ const Login = ({setIsLogin}) => {
             border-radius: 4px;
           }
 
-          .link-button:hover {
+          .link-button:hover:not(:disabled) {
             color: #e4c158;
             background: rgba(212, 175, 55, 0.1);
+          }
+
+          .link-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
           }
 
           .btn-signin {
