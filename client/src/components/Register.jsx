@@ -109,38 +109,39 @@ const Register = ({setIsLogin}) => {
   }
 
   const handleOTPVerify = async (otp) => {
-    try {
-      const response = await api.post('/verify-otp-register', {
-        email: tempUserData.email,
-        otp,
-        username: tempUserData.username,
-        usertype: tempUserData.usertype,
-        password: tempUserData.password
-      });
+  try {
+    const response = await api.post('/verify-otp-register', {
+      email: tempUserData.email,
+      otp,
+      username: tempUserData.username,
+      usertype: tempUserData.usertype,
+      password: tempUserData.password
+    });
 
-      const user = response.data;
-      
-      localStorage.setItem('userId', user._id);
-      localStorage.setItem('userType', user.usertype);
-      localStorage.setItem('username', user.username);
-      localStorage.setItem('email', user.email);
-
-      setShowOTPModal(false);
-      showSuccess('Registration Successful!', `Welcome ${user.username}! Your account has been created.`);
-      
-      setTimeout(() => {
-        if(user.usertype === 'customer'){
-          window.location.href = '/';
-        } else if(user.usertype === 'admin'){
-          window.location.href = '/admin';
-        } else if(user.usertype === 'flight-operator'){
-          window.location.href = '/flight-admin';
-        }
-      }, 1500);
-    } catch (err) {
-      throw new Error(err.response?.data?.message || 'Verification failed');
-    }
-  };
+    const user = response.data;
+    
+    // ✅ Don't auto-login - redirect to login page instead
+    setShowOTPModal(false);
+    showSuccess(
+      'Registration Successful!', 
+      `Welcome ${user.username}! Your account has been created. Please login to continue.`
+    );
+    
+    // Redirect to login page after 2 seconds
+    setTimeout(() => {
+      setIsLogin(true); // Switch to login form
+      // Clear registration form data
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      setUsertype('');
+      setStep(1);
+    }, 2000);
+  } catch (err) {
+    throw new Error(err.response?.data?.message || 'Verification failed');
+  }
+};
 
   const handleOTPResend = async () => {
     try {
