@@ -65,7 +65,7 @@ const Navbar = () => {
                         </div>
                         
                         <div className="creator-intro">
-                            <h2 className="creator-name">Creator</h2>
+                            <h2 className="creator-name">Saladi Subrahmanyam</h2>
                             <p className="creator-title">AI-Driven Full Stack Developer</p>
                         </div>
                     </div>
